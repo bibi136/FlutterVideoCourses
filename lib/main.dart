@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import './views/video_cell.dart';
 
 void main() => runApp(MyApp());
 
@@ -22,6 +27,7 @@ class RealWorldApp extends StatefulWidget {
 
 class _RealWorldAppState extends State<RealWorldApp> {
   var _isLoading = true;
+  final videos = List();
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +43,9 @@ class _RealWorldAppState extends State<RealWorldApp> {
             onPressed: () {
               print("Reloading...");
               setState(() {
-                _isLoading = false;
+                _isLoading = true;
               });
+              _fetchData();
             },
           )
         ],
@@ -46,8 +53,40 @@ class _RealWorldAppState extends State<RealWorldApp> {
       body: Center(
         child: _isLoading
             ? CircularProgressIndicator()
-            : Text("Finished loading..."),
+            : new ListView.separated(
+                separatorBuilder: (context, i) {
+                  return Divider(
+                    height: 16.0,
+                    color: Colors.transparent,
+                  );
+                },
+                itemBuilder: (context, index) {
+                  return FlatButton(
+                    child: VideoItem(video: videos[index]),
+                    onPressed: () {
+                      print("Opening video");
+                    },
+                  );
+                },
+                itemCount: videos.length,
+              ),
       ),
     );
+  }
+
+  void _fetchData() async {
+    print("Attempting to fetch data from network");
+
+    final url = "http://api.letsbuildthatapp.com/youtube/home_feed";
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      print(response.body);
+      setState(() {
+        videos.clear();
+        videos.addAll(json.decode(response.body)["videos"]);
+        _isLoading = false;
+      });
+    }
   }
 }
