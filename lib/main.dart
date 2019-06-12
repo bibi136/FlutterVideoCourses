@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import './views/video_cell.dart';
+import 'detail_page.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -28,6 +30,12 @@ class RealWorldApp extends StatefulWidget {
 class _RealWorldAppState extends State<RealWorldApp> {
   var _isLoading = true;
   final videos = List();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +72,10 @@ class _RealWorldAppState extends State<RealWorldApp> {
                   return FlatButton(
                     child: VideoItem(video: videos[index]),
                     onPressed: () {
-                      print("Opening video");
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return DetailPage(videos[index]["id"]);
+                      }));
                     },
                   );
                 },
